@@ -190,9 +190,9 @@ export default function Home() {
               </div>
             </section>
 
-            <div className="textRevel z-10 flex min-h-[16rem] items-center justify-center rounded-lg border bg-white dark:bg-black">
+            {/* <div className="textRevel z-10 flex min-h-[16rem] items-center justify-center rounded-lg border bg-white dark:bg-black">
               <TextReveal text="Immerse yourself in crystal-clear audio with our premium earbuds." />
-            </div>
+            </div> */}
           </main>
         </div>
         <Footer />

@@ -28,7 +28,7 @@ function Page() {
         const fetchCartItems = async () => {
             try {
                 const response = await axios.get('/api/cart/get');
-                const items: CartItem[] = response.data;
+                const items: CartItem[] = response.data.cartItems; 
                 setCartItems(items);
                 const total = items.reduce((sum: number, item: CartItem) => {
                     const price = parseFloat(item.product.price);
