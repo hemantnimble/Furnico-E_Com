@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
     const session = await auth();
 
@@ -18,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
     try {
         // Find the order
-        const order = await prisma.order.findUnique({
+        const order = await db.order.findUnique({
             where: { id: orderId },
         });
         if (!order) {
@@ -34,7 +33,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "Not authorized to change this order's status" }, { status: 403 });
         }
         // Update the status
-        const updatedOrder = await prisma.order.update({
+        const updatedOrder = await db.order.update({
             where: { id: orderId },
             data: { status },
         });

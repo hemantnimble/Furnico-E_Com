@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
 
-const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
     const url = new URL(req.url);
@@ -13,7 +12,7 @@ export async function GET(req: NextRequest) {
 
     try {
         // Fetch products that match the search query
-        const products = await prisma.products.findMany({
+        const products = await db.products.findMany({
             where: {
                 title: {
                     contains: query,

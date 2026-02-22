@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
 
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -17,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     try {
         // Add or update the cart item
-        const adCart = await prisma.cartItem.upsert({
+        const adCart = await db.cartItem.upsert({
             where: {
                 userId_productId: {
                     userId,
@@ -37,7 +36,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Fetch the product details
-        const product = await prisma.products.findUnique({
+        const product = await db.products.findUnique({
             where: {
                 id: productId,
             },

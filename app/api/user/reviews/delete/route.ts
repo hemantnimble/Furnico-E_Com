@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -19,7 +18,7 @@ export async function POST(req: NextRequest) {
         }
 
 
-        const deletedReview = await prisma.review.delete({
+        const deletedReview = await db.review.delete({
             where: { id: reviewId },
         })
 

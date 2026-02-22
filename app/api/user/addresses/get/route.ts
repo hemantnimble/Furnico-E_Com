@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
     const session = await auth();
@@ -12,7 +11,7 @@ export async function GET(req: NextRequest) {
           }
       
           // Fetch addresses associated with the user
-          const addresses = await prisma.address.findMany({
+          const addresses = await db.address.findMany({
             where: {
               userId: userId,
             },

@@ -1,6 +1,8 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 interface CartItem {
     id: string;
@@ -16,120 +18,140 @@ interface Product {
     price: string;
 }
 
-function CheckoutPage({ amount, cartItems, selectedAddress }: { amount: number, cartItems: CartItem[], selectedAddress: any }) {
-    const [errorMessage, setErrorMessage] = useState<string>();
-    const [loading, setLoading] = useState<boolean>(false);
-    const router = useRouter(); // Initialize useRouter
+function CheckoutPage({
+    amount,
+    cartItems,
+    selectedAddress,
+}: {
+    amount: number;
+    cartItems: CartItem[];
+    selectedAddress: any;
+}) {
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const { data: session } = useSession();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoading(true);
 
         if (!selectedAddress) {
-            alert("Please select address")
+            toast.error('Please select a delivery address');
             setLoading(false);
             return;
         }
 
         try {
-            // Step 1: Create a Razorpay order
-            const razorpayResponse = await fetch("/api/orders/createrazor", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+            // Step 1: Create Razorpay order
+            const razorpayResponse = await fetch('/api/orders/createrazor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount }),
             });
 
-            const razorpayOrder = await razorpayResponse.json();
+            if (!razorpayResponse.ok) {
+                toast.error('Failed to initiate payment');
+                return;
+            }
 
-            // Step 2: Load Razorpay script dynamically
-            const script = document.createElement("script");
-            script.src = "https://checkout.razorpay.com/v1/checkout.js";
-            script.async = true;
-            document.body.appendChild(script);
+            const { order: razorpayOrder } = await razorpayResponse.json();
 
-            script.onload = () => {
-                const options = {
-                    key: process.env.NEXT_PUBLIC_PAYMENT_PUBLIC, // Use your Razorpay key ID
-                    amount: razorpayOrder.order.amount * 100,
-                    currency: razorpayOrder.order.currency,
-                    name: "Your Company Name",
-                    description: "Test Transaction",
-                    image: "https://example.com/your_logo.png",
-                    order_id: razorpayOrder.order.id,
-                    handler: async function (response: any) {
-                        // Step 3: Handle successful payment
-                        alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+            // Step 2: Load Razorpay script
+            await loadRazorpayScript();
 
-                        // Step 4: Create an order in your database
-                        try {
-                            const orderResponse = await fetch("/api/orders/create", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({
-                                    paymentIntentId: response.razorpay_payment_id,
-                                    cartItems,
-                                    quantity: 1, // Assuming quantity is 1 for single product
-                                    selectedAddress,
-                                }),
-                            });
+            const options = {
+                key: process.env.NEXT_PUBLIC_PAYMENT_PUBLIC,
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                name: 'FurniCo',
+                description: 'Order Payment',
+                order_id: razorpayOrder.id,
+                prefill: {
+                    name: session?.user?.name ?? '',
+                    email: session?.user?.email ?? '',
+                    contact: '',
+                },
+                theme: { color: '#111827' },
+                handler: async function (response: any) {
+                    try {
+                        // Step 3: Verify payment signature server-side
+                        const verifyResponse = await fetch('/api/orders/createrazor', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                            }),
+                        });
 
-                            const order = await orderResponse.json();
-
-                            if (orderResponse.ok) {
-                                // Step 5: Redirect to the success page or order details page
-                                router.push(`${process.env.NEXT_PUBLIC_RETURN_URL}/user/orders`); // Redirect to order details page
-                            } else {
-                                setErrorMessage("Failed to create order. Please contact support.");
-                            }
-                        } catch (error) {
-                            console.error("Order creation failed:", error);
-                            setErrorMessage("Order creation failed. Please contact support.");
+                        if (!verifyResponse.ok) {
+                            toast.error('Payment verification failed. Contact support.');
+                            return;
                         }
-                    },
-                    prefill: {
-                        name: "John Doe",
-                        email: "john.doe@example.com",
-                        contact: "9999999999",
-                    },
-                    notes: {
-                        address: "Razorpay Corporate Office",
-                    },
-                    theme: {
-                        color: "#3399cc",
-                    },
-                };
 
-                const rzp = new (window as any).Razorpay(options);
-                rzp.open();
+                        // Step 4: Create order in DB
+                        const orderResponse = await fetch('/api/orders/create', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                paymentIntentId: response.razorpay_payment_id,
+                                cartItems,
+                                quantity: 1,
+                                selectedAddress,
+                            }),
+                        });
+
+                        if (orderResponse.ok) {
+                            toast.success('Order placed successfully!');
+                            router.push('/user/orders');
+                        } else {
+                            toast.error('Order creation failed. Contact support.');
+                        }
+                    } catch (err) {
+                        console.error('Post-payment error:', err);
+                        toast.error('Something went wrong. Contact support.');
+                    }
+                },
             };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', () => {
+                toast.error('Payment failed. Please try again.');
+            });
+            rzp.open();
         } catch (error) {
-            console.error("Payment failed:", error);
-            setErrorMessage("Payment failed. Please try again.");
+            console.error('Checkout error:', error);
+            toast.error('Payment failed. Please try again.');
         } finally {
             setLoading(false);
         }
-
-
-        setLoading(false);
     };
-
-
 
     return (
         <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
-            {errorMessage && <div>{errorMessage}</div>}
             <button
                 disabled={loading}
                 className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
             >
-                {!loading ? `Pay ₹${amount}` : "Processing..."}
+                {loading ? 'Processing...' : `Pay ₹${amount}`}
             </button>
         </form>
     );
+}
+
+function loadRazorpayScript(): Promise<void> {
+    return new Promise((resolve) => {
+        if (document.querySelector('script[src*="razorpay"]')) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        script.onload = () => resolve();
+        document.body.appendChild(script);
+    });
 }
 
 export default CheckoutPage;

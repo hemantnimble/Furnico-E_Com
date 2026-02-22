@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     try {
         const { id } = await req.json(); // Parse the JSON body of the request
-        const product = await prisma.products.findUnique({
+        const product = await db.products.findUnique({
             where: { id: id },
             include: { reviews: true }
         });

@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
 
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -16,7 +15,7 @@ export async function POST(req: NextRequest) {
 
 
     try {
-        const removeItem = await prisma.cartItem.delete({
+        const removeItem = await db.cartItem.delete({
             where: {
                 id
             },

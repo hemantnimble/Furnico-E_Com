@@ -1,9 +1,7 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
     const { oldPass, newPass } = await req.json();
@@ -19,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     try {
         // Fetch the user from the database
-        const user = await prisma.user.findUnique({
+        const user = await db.user.findUnique({
             where: {
                 email: session.user.email as string,
             },
@@ -40,7 +38,7 @@ export async function POST(req: NextRequest) {
         const hashedPassword = await bcrypt.hash(newPass, 10);
 
         // Update the user's password in the database
-        await prisma.user.update({
+        await db.user.update({
             where: { email: user.email as string },  // Safe to cast to string after check
             data: { hashedPassword: hashedPassword },
         });

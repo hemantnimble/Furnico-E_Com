@@ -1,8 +1,6 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 export async function GET() {
     const session = await auth();
@@ -14,7 +12,7 @@ export async function GET() {
     }
 
     try {
-        const orders = await prisma.orderItem.findMany({
+        const orders = await db.orderItem.findMany({
             include: {
                 order: {
                     include: {

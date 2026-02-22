@@ -1,18 +1,17 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const { category } = await req.json();
     try {
         let products;
         if (category && category !== 'All') {
-            products = await prisma.products.findMany({
+            products = await db.products.findMany({
                 where: { category: category as string },
                 include: { reviews: true }
             });
         } else {
-            products = await prisma.products.findMany({
+            products = await db.products.findMany({
                 include: { reviews: true }
             }); // Fetch all products
         }

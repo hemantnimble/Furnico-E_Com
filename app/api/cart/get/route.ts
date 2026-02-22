@@ -1,9 +1,8 @@
 // pages/api/cart.ts
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
 
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -15,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   try {
     // Fetch only the cart items belonging to the logged-in user
-    const cartItems = await prisma.cartItem.findMany({
+    const cartItems = await db.cartItem.findMany({
       where: { userId }, // Filter cart items by the logged-in user's ID
       include: { product: true }, // Include product details if needed
     });

@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -21,7 +20,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Create new address in the database
-        const newAddress = await prisma.address.create({
+        const newAddress = await db.address.create({
             data: {
                 userId, // This refers to the logged-in user's ID
                 name,

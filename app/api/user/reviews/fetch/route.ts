@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
 
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
@@ -12,7 +11,7 @@ export async function POST(req: NextRequest) {
     try {
         const { productId } = await req.json();
 
-        const reviews = await prisma.review.findMany({
+        const reviews = await db.review.findMany({
             where: { productId: String(productId) },
             include: {
                 user: {

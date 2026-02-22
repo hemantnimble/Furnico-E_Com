@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
 
-const prisma = new PrismaClient();
+const prisma =  db;
 
 export async function POST(req: NextRequest) {
     const { paymentIntentId, item, quantity, cartItems, selectedAddress } = await req.json();

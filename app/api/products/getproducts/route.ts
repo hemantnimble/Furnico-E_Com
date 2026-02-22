@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
-        const products = await prisma?.products.findMany()
+        const products = await db?.products.findMany()
         return NextResponse.json({
             products
         })

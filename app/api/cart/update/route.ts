@@ -1,40 +1,43 @@
-import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
-import { NextResponse, NextRequest } from "next/server";
+import { db } from '@/db';
+import { auth } from '@/auth';
+import { NextResponse, NextRequest } from 'next/server';
 
-const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
     const session = await auth();
     const userId = session?.user?.id;
 
-    // Return an error response if userId is not defined
     if (!userId) {
-        return NextResponse.json({ message: "User not authenticated" }, { status: 401 });
+        return NextResponse.json({ message: 'User not authenticated' }, { status: 401 });
     }
 
-    const { id, quantity } = await req.json();
-
     try {
-        const cartItem = await prisma.cartItem.upsert({
-            where: {
-                userId_productId: {
-                    userId: session.user.id,
-                    productId:id,
-                },
-            },
-            update: {
-                quantity,
-            },
-            create: {
-                userId: session.user.id,
-                productId:id,
-                quantity,
-            },
-        });
-        return NextResponse.json({ cartItem }, { status: 200 });
+        const { id, quantity } = await req.json();
+        // id here is the CartItem.id (not productId)
 
-    } catch (err:any) {
-        console.log(err)
+        if (!id || typeof id !== 'string') {
+            return NextResponse.json({ message: 'Invalid cart item id' }, { status: 400 });
+        }
+        if (typeof quantity !== 'number' || quantity < 1) {
+            return NextResponse.json({ message: 'Invalid quantity' }, { status: 400 });
+        }
+
+        // Verify the cart item belongs to this user before updating
+        const existing = await db.cartItem.findFirst({
+            where: { id, userId },
+        });
+
+        if (!existing) {
+            return NextResponse.json({ message: 'Cart item not found' }, { status: 404 });
+        }
+
+        const cartItem = await db.cartItem.update({
+            where: { id },
+            data: { quantity },
+        });
+
+        return NextResponse.json({ cartItem }, { status: 200 });
+    } catch (err: any) {
+        console.error('[cart/update]', err);
         return NextResponse.json({ message: err.message }, { status: 500 });
     }
 }

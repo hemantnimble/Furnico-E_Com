@@ -1,10 +1,9 @@
 import crypto from 'crypto';
-import { PrismaClient } from '@prisma/client';
+import { db } from "@/db";
 import { NextRequest, NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
 import { auth } from '@/auth';
 
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -18,7 +17,7 @@ export async function POST(req: NextRequest) {
     console.log(email)
 
     try {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await db.user.findUnique({ where: { email } });
         if (!user) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
@@ -27,7 +26,7 @@ export async function POST(req: NextRequest) {
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
 
         try {
-            await prisma.user.update({
+            await db.user.update({
                 where: { email },
                 data: {
                     otp,

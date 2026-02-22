@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { db } from "@/db";
 
-const prisma = new PrismaClient();
 export async function GET() {
     const session = await auth();
     const userId = session?.user?.id;
@@ -11,7 +10,7 @@ export async function GET() {
         return NextResponse.json({ message: "User not authenticated" }, { status: 401 });
     }
     try {
-        const orders = await prisma.order.findMany({
+        const orders = await db.order.findMany({
             where: { userId: userId as string },
             include: {
                 items: {

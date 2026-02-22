@@ -1,9 +1,8 @@
 import { auth } from '@/auth';
-import { PrismaClient } from '@prisma/client';
+import { db } from "@/db";
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 
-const prisma = new PrismaClient()
 
 export async function POST(req: NextRequest,) {
     const session = await auth();
@@ -13,7 +12,7 @@ export async function POST(req: NextRequest,) {
 
 
     try {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await db.user.findUnique({ where: { email } });
 
         if (!user) {
             return NextResponse.json({ message: 'User not found' });
@@ -28,7 +27,7 @@ export async function POST(req: NextRequest,) {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        await prisma.user.update({
+        await db.user.update({
             where: { email },
             data: {
                 hashedPassword: hashedPassword,

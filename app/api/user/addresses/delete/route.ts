@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 import { NextResponse, NextRequest } from "next/server";
-const prisma = new PrismaClient();
 export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const session = await auth();
@@ -18,7 +17,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'All address fields are required' }, { status: 400 });
         }
 
-        const deletedAddress = await prisma.address.delete({
+        const deletedAddress = await db.address.delete({
             where: {
                 userId: userId,
                 id: addressId
