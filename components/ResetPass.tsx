@@ -1,51 +1,4 @@
-// import { useState } from 'react';
-// import axios from 'axios';
-// import toast from 'react-hot-toast';
 
-// const ResetPassword = () => {
-//     const [otp, setOtp] = useState("");
-//     const [newPassword, setNewPassword] = useState("");
-//     const [message, setMessage] = useState("");
-
-//     const handleResetPassword = async (e: any) => {
-//         e.preventDefault();
-//         try {
-//             const response = await axios.post('/api/user/resetpassword', { otp, newPassword });
-//             setMessage(response.data.message);
-//             alert(response.data.message);
-//         } catch (error) {
-//             console.error(error);
-//             setMessage("Error resetting password. Please try again.");
-//             alert("Failed to reset password. Please try again.");
-//         }
-//     };
-
-//     return (
-//         <div>
-//             <h1>Reset Password</h1>
-//             <form onSubmit={handleResetPassword}>
-//                 <label>OTP:</label>
-//                 <input
-//                     type="text"
-//                     value={otp}
-//                     onChange={(e) => setOtp(e.target.value)}
-//                     required
-//                 />
-//                 <label>New Password:</label>
-//                 <input
-//                     type="password"
-//                     value={newPassword}
-//                     onChange={(e) => setNewPassword(e.target.value)}
-//                     required
-//                 />
-//                 <button type="submit">Reset Password</button>
-//             </form>
-//             {message && <p>{message}</p>}
-//         </div>
-//     );
-// };
-
-// export default ResetPassword;
 
 'use client'
 
@@ -73,12 +26,17 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ email }) => {
     const [error, setError] = useState("")
 
     const sendOtp = async () => {
+        if (!email || !email.includes('@')) {
+            alert("Please enter a valid email address first.");
+            return;
+        }
         try {
-            const response = await axios.post('/api/user/sendotp', {bodyEmail:email});
+            const response = await axios.post('/api/user/sendotp', { bodyEmail: email });
             alert("OTP sent successfully")
             setOpen(true)
-        } catch {
-            alert("Failed to send otp");
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.response?.data?.error || "Failed to send otp";
+            alert(errorMessage);
         }
     }
 
@@ -98,7 +56,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ email }) => {
             return
         }
         try {
-            const response = await axios.post('/api/user/resetpassword', { otp, newPassword,bodyEmail:email });
+            const response = await axios.post('/api/user/resetpassword', { otp, newPassword, bodyEmail: email });
             setError(response.data.message);
             if (response.data.message === "Password reset successful") {
                 setOpen(false);
@@ -113,7 +71,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ email }) => {
 
     return (
         <div>
-            <button className='text-sm font-semibold text-blue-600 underline decoration-2' onClick={sendOtp}>Recover Account</button>
+            <button type="button" className='text-sm font-semibold text-blue-600 underline decoration-2' onClick={sendOtp}>Recover Account</button>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>

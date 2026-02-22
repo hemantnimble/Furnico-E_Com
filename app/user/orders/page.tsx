@@ -49,7 +49,7 @@ const Orders: React.FC = () => {
     <>
       <div className="container mx-auto px-4 md:px-6 py-8">
         <Link className="flex gap-1 items-center mt-5 hover:gap-2 transition-all text-gray-600" href='/user/account'>
-          <ArrowLeftCircle/>
+          <ArrowLeftCircle />
           <h1 className="text-xl">Go Back</h1>
         </Link>
         <h1 className="text-2xl font-bold mb-6">Orders</h1>
@@ -101,7 +101,7 @@ const Orders: React.FC = () => {
                           ))}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          ${(order.items.reduce((total, item) => total + parseFloat(item.product.price) * item.quantity, 0)).toFixed(2)}
+                          ₹{(order.items.reduce((total, item) => total + parseFloat(item.product.price) * item.quantity, 0)).toFixed(2)}
                         </td>
                         <td className="px-4 py-3">{order.status}</td>
                       </tr>

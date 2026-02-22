@@ -5,12 +5,12 @@ import toast from 'react-hot-toast';
 import CartLoading from '@/components/CartLoading';
 import WordPullUp from "@/components/magicui/word-pull-up";
 import { useAppDispatch, useAppSelector } from '@/app/lib/store/hooks';
-import { removeCartItem,updateCartItem } from '../../lib/store/features/cart/cartSlice';
+import { fetchCartItems, removeCartItem, updateCartItem } from '../../lib/store/features/cart/cartSlice';
 
 interface Product {
     id: string;
     title: string;
-    price: string;
+    price: number;
     images: string[];
 }
 
@@ -24,18 +24,22 @@ interface CartItem {
 
 export default function CartPage() {
     const dispatch = useAppDispatch();
-    const { cartItems } = useAppSelector((state) => state.cart);
+    const { cartItems, status } = useAppSelector((state) => state.cart);
     const [totalPrice, setTotalPrice] = useState<number>(0);
-    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (status === 'idle') {
+            dispatch(fetchCartItems());
+        }
+    }, [dispatch, status]);
 
     // Calculate total price whenever cartItems change
     useEffect(() => {
-        // const total = cartItems.reduce((sum: number, item: CartItem) => {
-        //     const price = parseFloat(item.product.price);
-        //     return sum + price * item.quantity;
-        // }, 0);
-        // setTotalPrice(total);
-        setLoading(false); // Set loading to false after calculating total
+        const total = cartItems.reduce((sum, item) => {
+            const price = typeof item.product?.price === 'string' ? parseFloat(item.product.price) : (item.product?.price || 0);
+            return sum + price * item.quantity;
+        }, 0);
+        setTotalPrice(total);
     }, [cartItems]);
 
     // Handle delete item
@@ -63,7 +67,7 @@ export default function CartPage() {
         }
     };
 
-    if (loading) {
+    if (status === 'loading' || status === 'idle') {
         return (
             <div className='flex items-center justify-center w-full h-[100vh] flex-col'>
                 <img className='w-[30%]' src='/assets/cart.gif' alt="cart gif" />
@@ -74,8 +78,8 @@ export default function CartPage() {
             </div>
         );
     }
-    
-    if (!cartItems || cartItems.length === 0) {
+
+    if (status === 'succeeded' && (!cartItems || cartItems.length === 0)) {
         return (
             <div className="flex flex-col items-center justify-center py-8">
                 <h2 className="text-lg font-semibold text-gray-900">Your cart is empty.</h2>
@@ -85,7 +89,7 @@ export default function CartPage() {
             </div>
         );
     }
-    
+
     // Ensure all cart items have a product object
     if (cartItems.some(item => !item.product)) {
         return (
@@ -123,7 +127,7 @@ export default function CartPage() {
                                                     <p className="mx-0 mt-1 mb-0 text-sm text-gray-400">36EU - 4US</p>
                                                 </div>
                                                 <div className="mt-4 flex items-end justify-between sm:mt-0 sm:items-start sm:justify-end">
-                                                    <p className="shrink-0 w-20 text-base font-semibold text-gray-900 sm:order-2 sm:ml-8 sm:text-right">${item.product.price}</p>
+                                                    <p className="shrink-0 w-20 text-base font-semibold text-gray-900 sm:order-2 sm:ml-8 sm:text-right">₹{item.product.price}</p>
                                                     <div className="sm:order-1">
                                                         <div className="mx-auto flex h-8 items-stretch text-gray-600">
                                                             <button onClick={() => handleQuantityChange(item.product?.id, false)} className="flex items-center justify-center rounded-l-md bg-gray-200 px-4 transition hover:bg-black hover:text-white">-</button>
@@ -151,17 +155,17 @@ export default function CartPage() {
                             <div className="mt-6 border-t border-b py-2">
                                 <div className="flex items-center justify-between">
                                     <p className="text-sm text-gray-400">Subtotal</p>
-                                    <p className="text-lg font-semibold text-gray-900">${totalPrice.toFixed(2)}</p>
+                                    <p className="text-lg font-semibold text-gray-900">₹{totalPrice.toFixed(2)}</p>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <p className="text-sm text-gray-400">Shipping</p>
-                                    <p className="text-lg font-semibold text-gray-900">$8.00</p>
+                                    <p className="text-lg font-semibold text-gray-900">₹8.00</p>
                                 </div>
                             </div>
                             <div className="mt-6 flex items-center justify-between">
                                 <p className="text-sm font-medium text-gray-900">Total</p>
                                 <p className="text-2xl font-semibold text-gray-900">
-                                    <span className="text-xs font-normal text-gray-400">USD</span> ${(totalPrice + 8).toFixed(2)}
+                                    <span className="text-xs font-normal text-gray-400">INR</span> ₹{(totalPrice + 8).toFixed(2)}
                                 </p>
                             </div>
                             <div className="mt-6 text-center">

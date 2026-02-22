@@ -2,7 +2,6 @@ import axios from 'axios';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
-import { useCart } from './CartContext';
 import { Star } from 'lucide-react';
 import { useAppDispatch } from '@/app/lib/store/hooks';
 import { addCartItem } from '@/app/lib/store/features/cart/cartSlice';
@@ -12,17 +11,24 @@ interface Item {
     price: number;
     title: string;
     images: string[];
+    reviews?: { rating: number }[];
 }
 
 function Card({ item }: { item: Item }) {
     const [loading, setLoading] = useState(false);
-    const dispatch=useAppDispatch();
+    const dispatch = useAppDispatch();
+
+    const ratings = item.reviews && item.reviews.length > 0
+        ? item.reviews.map(r => r.rating)
+        : [];
+    const avgRating = ratings.length > 0
+        ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+        : "0.0";
 
     const handleCart = async (productId: string) => {
         setLoading(true);
         try {
-            // const response1 = await axios.post("/api/cart/add", { productId, quantity: 1 });
-            await dispatch(addCartItem(productId))
+            await dispatch(addCartItem(productId));
             toast.success('Product added to cart');
         } catch (error) {
             console.error('Error adding to cart:', error);
@@ -30,7 +36,7 @@ function Card({ item }: { item: Item }) {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <div className='mb-10 relative'>
@@ -98,16 +104,17 @@ function Card({ item }: { item: Item }) {
                 <div className='flex justify-between px-2 py-2 items-start'>
                     <span className=''>
                         <h5 className='font-extrabold'>{item.title}</h5>
-                        <p className='font-semibold'>${item.price}</p>
+                        <p className='font-semibold'>₹{item.price}</p>
                     </span>
                     <span className='flex items-center gap-1'>
                         <svg className='w-[16px] h-[16px]' xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 122.88 117.1"><defs><style dangerouslySetInnerHTML={{ __html: ".cls-1{fill:#ffd401;}" }} /></defs><title>star-symbol</title><path className="cls-1" d="M64.42,2,80.13,38.7,120,42.26a3.2,3.2,0,0,1,1.82,5.62h0L91.64,74.18l8.9,39A3.19,3.19,0,0,1,98.12,117a3.27,3.27,0,0,1-2.46-.46L61.41,96.1,27.07,116.64a3.18,3.18,0,0,1-4.38-1.09,3.14,3.14,0,0,1-.37-2.38h0l8.91-39L1.09,47.88a3.24,3.24,0,0,1-.32-4.52,3.32,3.32,0,0,1,2.29-1l39.72-3.56L58.49,2a3.24,3.24,0,0,1,5.93,0Z" /></svg>
-                        <p>4.4</p>
+                        <p>{avgRating}</p>
+                        <span className='text-xs text-gray-400'>({item.reviews?.length || 0})</span>
                     </span>
                 </div>
             </Link>
         </div>
-    )
+    );
 }
 
 export default Card;

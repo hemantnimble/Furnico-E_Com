@@ -1,6 +1,15 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+export interface Review {
+    id: string;
+    content: string;
+    rating: number;
+    productId: string;
+    userId: string;
+    createdAt: string;
+}
+
 export interface Product {
     id: string;
     title: string;
@@ -8,6 +17,7 @@ export interface Product {
     stock: number;
     images: string[];
     category: string;
+    reviews?: Review[];
 }
 
 interface ProductState {
@@ -38,7 +48,7 @@ export const fetchSingleProduct = createAsyncThunk(
     'products/fetchSingleProduct',
     async (productId: string, { rejectWithValue }) => {
         try {
-            const response = await axios.post<{ product: Product }>('/api/products/getsingleproduct', { id:productId });
+            const response = await axios.post<{ product: Product }>('/api/products/getsingleproduct', { id: productId });
             return response.data.product;
         } catch (error: any) {
             return rejectWithValue(error.response?.data || 'Failed to fetch product');
@@ -112,7 +122,7 @@ const productSlice = createSlice({
             .addCase(fetchSingleProduct.fulfilled, (state, action: PayloadAction<Product>) => {
                 state.status = 'succeeded';
                 state.singleProduct = action.payload;
-              })
+            })
             .addCase(fetchSingleProduct.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string || 'Failed to fetch product';

@@ -916,16 +916,18 @@
   color: #000;
   /*Set to match the Tailwind colour you want the active one to be */
 }
-.textRevel p{
-  font-size:63px;
+
+.textRevel p {
+  font-size: 63px;
   line-height: 53px;
 }
 
-.carousel > button:first-of-type {
+.carousel>button:first-of-type {
   /* right: 1rem; */
   left: 1rem;
 }
-.carousel > button:last-of-type{
+
+.carousel>button:last-of-type {
   right: 1rem;
   /* left: 1rem; */
 }

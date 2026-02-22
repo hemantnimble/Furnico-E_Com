@@ -24,13 +24,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <StoreProvider>
           <SessionProvider>
-            <CartProvider>
-              <Navbar />
-              <div className="pt-16 pb-[64px] lg:pb-0">
-                {children}
-              </div>
-              <BottomNavbar />
-            </CartProvider>
+            <Navbar />
+            <div className="pt-16 pb-[64px] lg:pb-0">
+              {children}
+            </div>
+            <BottomNavbar />
           </SessionProvider>
         </StoreProvider>
       </body>

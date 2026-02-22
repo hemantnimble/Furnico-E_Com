@@ -1,10 +1,11 @@
 'use client'
 import AllProducts from '@/components/AllProducts'
-import { useCart } from '@/components/CartContext';
+import toast from 'react-hot-toast';
+import { useAppDispatch } from '@/app/lib/store/hooks';
+import { addCartItem } from '@/app/lib/store/features/cart/cartSlice';
 import axios from 'axios';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
-import toast from 'react-hot-toast';
 
 interface Product {
     id: string;
@@ -16,9 +17,9 @@ interface Product {
     updatedAt: string;
 }
 function Explore() {
+    const dispatch = useAppDispatch();
     const [ploading, setPLoading] = useState(false);
     const [loading, setLoading] = useState<string | null>(null);
-    const { cartItems, setCartItems } = useCart();
     const [products, setProducts] = useState<Product[]>([]);
     const [category, setCategory] = useState("All");
     const [activeCategory, setActiveCategory] = useState<string>('All');
@@ -46,10 +47,7 @@ function Explore() {
         e.preventDefault();
         setLoading(productId);
         try {
-            const response1 = await axios.post("/api/cart/add", { productId, quantity: 1 });
-            const response = await axios.get('/api/cart/get');
-            const items = response.data.length;
-            setCartItems(items);
+            await dispatch(addCartItem(productId)).unwrap();
             toast.success('Product added to cart');
         } catch (error) {
             console.error('Error adding to cart:', error);
@@ -131,7 +129,7 @@ function Explore() {
                         ))
                     ) : (
                         products.length > 0 ? (
-                            products.map(item => (
+                            products.map((item: Product) => (
                                 <Link href={`/product/${item.id}`} key={item.id}>
                                     <article className="rounded-xl shadow-lg hover:shadow-xl">
                                         <div className="relative flex items-end overflow-hidden rounded-xl bg-slate-200">

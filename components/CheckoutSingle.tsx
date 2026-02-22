@@ -105,7 +105,7 @@ function CheckoutPageSingle({ amount, item, selectedAddress }: { amount: number,
         <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
             {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
             <Button className="w-full mt-4" disabled={loading}>
-                {!loading ? `Pay $${amount}` : "Processing..."}
+                {!loading ? `Pay ₹${amount}` : "Processing..."}
             </Button>
         </form>
     );

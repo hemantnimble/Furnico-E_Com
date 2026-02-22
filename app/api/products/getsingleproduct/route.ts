@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
         const { id } = await req.json(); // Parse the JSON body of the request
         const product = await prisma.products.findUnique({
             where: { id: id },
+            include: { reviews: true }
         });
 
         if (!product) {

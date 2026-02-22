@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import { MoreHorizontal, Search, ShoppingBag, ShoppingCart, Users, Package, DollarSign, Menu, Plus, Edit, Trash2 } from "lucide-react"
+import { MoreHorizontal, Search, ShoppingBag, ShoppingCart, Users, Package, IndianRupee, Menu, Plus, Edit, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,7 +42,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import axios from "axios"
 import { signOut } from "next-auth/react"
-import { fetchProducts,deleteProduct } from '@/app/lib/store/features/products/productSlice';
+import { fetchProducts, deleteProduct } from '@/app/lib/store/features/products/productSlice';
 import { useAppDispatch, useAppSelector } from '@/app/lib/store/hooks';
 
 interface Product {
@@ -230,11 +230,11 @@ export default function Component() {
                       <CardTitle className="text-sm font-medium">
                         Total Revenue
                       </CardTitle>
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                      <IndianRupee className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        $ {loading ? "loading..." : totalRevenue}
+                        ₹ {loading ? "loading..." : totalRevenue}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         +20.1% from last month
@@ -338,7 +338,7 @@ export default function Component() {
                               <TableCell className="font-medium">{order.product.title}</TableCell>
                               <TableCell >{order.order.user.name} </TableCell>
                               <TableCell>
-                                $ {order.product.price}
+                                ₹ {order.product.price}
                               </TableCell>
                               <TableCell>
                                 <form className="max-w-sm mx-auto">
@@ -395,7 +395,7 @@ export default function Component() {
                         {items.map((product) => (
                           <TableRow key={product.id}>
                             <TableCell>{product.title}</TableCell>
-                            <TableCell>${product.price}</TableCell>
+                            <TableCell>₹{product.price}</TableCell>
                             <TableCell>
                               {product.stock}
                             </TableCell>
