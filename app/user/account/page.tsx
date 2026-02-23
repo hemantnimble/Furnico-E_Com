@@ -1,95 +1,140 @@
-'use client'
+'use client';
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 
-const Home: React.FC = () => {
+const AccountPage: React.FC = () => {
+  const { data: session } = useSession();
 
-  const session = useSession()
   const handleSignout = () => {
     try {
       signOut();
-      alert('Signed out successfully');
     } catch (err) {
-      console.error('Error signing out: ', err);
-      alert('Error signing out');
+      console.error('Error signing out:', err);
     }
   };
-  return (
-    <>
-      <div className="p-6 bg-background text-foreground">
-        <h1 className="text-3xl font-bold text-primary">Hey! {session.data?.user.name}</h1>
-        <div className="flex flex-col mt-4 space-y-4">
-          <Link href='/user/orders'>
-            <button className="w-full flex items-center bg-secondary text-secondary-foreground p-3 rounded-lg shadow-lg hover:bg-secondary/80 transition duration-200">
-              <img aria-hidden="true" alt="Orders" src="https://openui.fly.dev/openui/24x24.svg?text=📦" />
-              <span className="ml-2">Orders</span>
-            </button>
-          </Link>
-          <Link href='/user/account/profile'>
-            <button className=" w-full flex items-center bg-secondary text-secondary-foreground p-3 rounded-lg shadow-lg hover:bg-secondary/80 transition duration-200">
-              <svg className='w-[24px] h-[24px]' xmlns="http://www.w3.org/2000/svg" width={430} height={430} viewBox="0 0 430 430" fill="none">
-                <path d="M55 350C55 286.487 106.487 235 170 235H260C323.513 235 375 286.487 375 350V372C375 373.657 373.657 375 372 375H58C56.3431 375 55 373.657 55 372V350Z" fill="#4BB3FD" />
-                <g style={{ mixBlendMode: 'multiply' }} opacity="0.5">
-                  <path d="M170 235C106.487 235 55 286.487 55 350V372C55 373.657 56.3431 375 58 375H110V350C110 286.487 161.487 235 225 235H170Z" fill="#4BB3FD" />
-                </g>
-                <path d="M272.496 76.7327C283.423 89.7808 290 106.648 290 125C290 166.478 256.372 200 215 200C173.628 200 140 166.372 140 125C140 83.628 173.628 50 215 50C238.126 50 258.706 60.396 272.496 76.7327Z" fill="#FFC738" />
-                <g style={{ mixBlendMode: 'multiply' }} opacity="0.5">
-                  <path d="M265.319 180.618C257.407 183.455 248.882 185 240 185C198.628 185 165 151.372 165 110C165 87.955 174.548 68.1085 189.728 54.377C160.762 64.766 140 92.4926 140 125C140 166.372 173.628 200 215 200C234.349 200 252.005 192.668 265.319 180.618Z" fill="#FFC738" />
-                </g>
-              </svg>
-              <span className="ml-2">Profile</span>
-            </button>
-          </Link>
-          <Link href='/user/address'>
-            <button className=" w-full flex items-center bg-secondary text-secondary-foreground p-3 rounded-lg shadow-lg hover:bg-secondary/80 transition duration-200">
-              <img aria-hidden="true" alt="Coupons" src="https://openui.fly.dev/openui/24x24.svg?text=🎁" />
-              <span className="ml-2">Saved Address</span>
-            </button>
-          </Link>
-          <Link href='/user/orders'>
-            <button className=" w-full flex items-center bg-secondary text-secondary-foreground p-3 rounded-lg shadow-lg hover:bg-secondary/80 transition duration-200">
-              <img aria-hidden="true" alt="Help Center" src="https://openui.fly.dev/openui/24x24.svg?text=🆘" />
-              <span className="ml-2">Help Center</span>
-            </button>
-          </Link>
-        </div>
-        <button onClick={handleSignout} className="Btn mt-3">
-          <div className="sign"><svg viewBox="0 0 512 512"><path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z" /></svg></div>
-          <div className="text">Logout</div>
-        </button>
-      </div>
-      {/* <div className="bg-background text-foreground p-4 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold mb-4">Account Settings</h2>
-        <ul className="space-y-2">
-          <li className="flex items-center">
-            <img aria-hidden="true" alt="Flipkart Plus" src="https://openui.fly.dev/openui/24x24.svg?text=➕" className="mr-2" />
-            <span className="text-primary">Flipkart Plus</span>
-          </li>
-          <li className="flex items-center">
-            <img aria-hidden="true" alt="Edit Profile" src="https://openui.fly.dev/openui/24x24.svg?text=👤" className="mr-2" />
-            <span className="text-primary">Edit Profile</span>
-          </li>
-          <li className="flex items-center">
-            <img aria-hidden="true" alt="Saved Credit / Debit & Gift Cards" src="https://openui.fly.dev/openui/24x24.svg?text=💳" className="mr-2" />
-            <span className="text-primary">Saved Credit / Debit &amp; Gift Cards</span>
-          </li>
-          <li className="flex items-center">
-            <img aria-hidden="true" alt="Saved Addresses" src="https://openui.fly.dev/openui/24x24.svg?text=📍" className="mr-2" />
-            <span className="text-primary">Saved Addresses</span>
-          </li>
-          <li className="flex items-center">
-            <img aria-hidden="true" alt="Select Language" src="https://openui.fly.dev/openui/24x24.svg?text=🌐" className="mr-2" />
-            <span className="text-primary">Select Language</span>
-          </li>
-          <li className="flex items-center">
-            <img aria-hidden="true" alt="Notification Settings" src="https://openui.fly.dev/openui/24x24.svg?text=🔔" className="mr-2" />
-            <span className="text-primary">Notification Settings</span>
-          </li>
-        </ul>
-      </div> */}
 
-    </>
+  const initials = session?.user?.name
+    ? session.user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
+
+  const menuItems = [
+    {
+      href: '/user/orders',
+      label: 'My Orders',
+      description: 'Track, return or buy again',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      ),
+    },
+    {
+      href: '/user/account/profile',
+      label: 'Profile',
+      description: 'Manage your personal details',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/user/address',
+      label: 'Saved Addresses',
+      description: 'Manage delivery addresses',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/user/help',
+      label: 'Help Center',
+      description: 'Get support for your orders',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+
+        {/* ── Header ── */}
+        <div className="mb-8">
+          <p className="text-xs tracking-widest text-gray-400 uppercase mb-1">My Account</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Account</h1>
+          <div className="mt-4 border-b border-gray-200" />
+        </div>
+
+        {/* ── User card ── */}
+        <div className="flex items-center gap-5 bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-8">
+          {session?.user?.image ? (
+            <img
+              src={session.user.image}
+              alt={session.user.name || 'User'}
+              className="w-16 h-16 rounded-full object-cover border-2 border-white shadow"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-900 flex items-center justify-center text-white text-xl font-bold shrink-0 select-none">
+              {initials}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-[10px] tracking-widest text-gray-400 uppercase mb-0.5">Welcome back</p>
+            <h2 className="text-lg font-bold text-gray-900 truncate">
+              {session?.user?.name || 'Guest'}
+            </h2>
+            {session?.user?.email && (
+              <p className="text-sm text-gray-400 truncate">{session.user.email}</p>
+            )}
+          </div>
+        </div>
+
+        {/* ── Menu items ── */}
+        <div className="flex flex-col gap-3 mb-8">
+          {menuItems.map(({ href, label, description, icon }) => (
+            <Link key={label} href={href}>
+              <div className="group flex items-center gap-4 px-5 py-4 rounded-2xl border border-gray-100 bg-white hover:border-gray-300 hover:shadow-sm transition-all duration-200 cursor-pointer">
+                {/* Icon */}
+                <div className="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-gray-900 group-hover:text-white text-gray-500 flex items-center justify-center shrink-0 transition-colors duration-200">
+                  {icon}
+                </div>
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">{label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+                </div>
+                {/* Arrow */}
+                <svg className="w-4 h-4 text-gray-300 group-hover:text-gray-600 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── Sign out ── */}
+        <div className="border-t border-gray-100 pt-6">
+          <button
+            onClick={handleSignout}
+            className="w-full flex items-center justify-center gap-2.5 rounded-full border border-gray-200 py-3 text-sm font-medium text-gray-500 hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            Sign Out
+          </button>
+        </div>
+
+      </div>
+    </div>
   );
 };
 
-export default Home;
+export default AccountPage;
