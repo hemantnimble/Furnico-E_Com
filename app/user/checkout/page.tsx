@@ -23,8 +23,7 @@ function Page() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [totalPrice, setTotalPrice] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectedAddress, setSelectedAddress] = useState(null);
-
+    const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
