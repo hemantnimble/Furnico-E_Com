@@ -99,71 +99,23 @@ npx prisma db push
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
----
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## 📁 Project Structure
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-```
-furnico/
-├── app/
-│   ├── admin/          # Admin dashboard, add/update product pages
-│   ├── api/            # API routes (auth, cart, orders, products, user)
-│   ├── explore/        # Product browse & filter page
-│   ├── product/[id]/   # Product detail page
-│   ├── user/           # Cart, checkout, orders, account, addresses
-│   └── lib/store/      # Redux store, slices (cart, products)
-├── components/         # Reusable UI components
-├── prisma/
-│   └── schema.prisma   # Database schema
-├── auth.ts             # NextAuth configuration
-├── db.ts               # Prisma client
-└── middleware.ts       # Route protection
-```
+## Learn More
 
----
+To learn more about Next.js, take a look at the following resources:
 
-## 🗄️ Data Models
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-- **User** — Auth, roles (USER / ADMIN), addresses, orders, reviews
-- **Products** — Title, price, category, images, stock, reviews
-- **Order / OrderItem** — Links users to purchased products with payment details
-- **CartItem** — Per-user cart with quantity
-- **Address** — Saved delivery addresses linked to users and orders
-- **Review** — Rating + content, restricted to verified purchasers
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
----
+## Deploy on Vercel
 
-## 🔐 Authentication & Authorization
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-- **Google OAuth** and **email/password** sign-in via NextAuth v5
-- JWT sessions with role claims (`USER` / `ADMIN`)
-- Middleware protects `/user/account`, `/user/checkout`, and all `/admin` routes
-- Admin API routes verify the `ADMIN` role server-side
-
----
-
-## 💳 Payment Flow
-
-1. Client calls `/api/orders/createrazor` → creates a Razorpay order
-2. Razorpay checkout opens in the browser
-3. On success, client calls `/api/orders/createrazor` (PUT) to verify the signature
-4. On verified, `/api/orders/create` persists the order in MongoDB and clears the cart
-
----
-
-## 📦 Build & Deploy
-
-```bash
-npm run build   # runs prisma generate + next build
-npm start
-```
-
-Deploy easily to **Vercel** — set all environment variables in the Vercel dashboard.
-
----
-
-## 📄 License
-
-MIT
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
