@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface Product {
   id: string;
@@ -47,6 +48,8 @@ const Orders: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null); // order awaiting confirm
 
   useEffect(() => {
     axios.get('/api/orders/get')
@@ -55,14 +58,35 @@ const Orders: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleCancel = async (orderId: string) => {
+    setCancellingId(orderId);
+    setConfirmId(null);
+    try {
+      await axios.post('/api/orders/cancel', { orderId });
+      // Update local state — no refetch needed
+      setOrders(prev =>
+        prev.map(o => o.id === orderId ? { ...o, status: 'CANCELLED' } : o)
+      );
+      toast.success('Order cancelled successfully');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to cancel order');
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  const canCancel = (status: string) =>
+    status === 'PENDING' || status === 'PROCESSING';
+
   // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-4">
           <div className="h-8 w-40 bg-gray-100 rounded-lg animate-pulse" />
-          {[0,1,2].map(i => (
-            <div key={i} className="h-20 rounded-2xl bg-gray-100 animate-pulse" style={{ animationDelay: `${i*0.1}s` }} />
+          {[0, 1, 2].map(i => (
+            <div key={i} className="h-20 rounded-2xl bg-gray-100 animate-pulse"
+              style={{ animationDelay: `${i * 0.1}s` }} />
           ))}
         </div>
       </div>
@@ -132,6 +156,8 @@ const Orders: React.FC = () => {
               );
               const isOpen = expanded === order.id;
               const shortId = order.id.slice(0, 8).toUpperCase();
+              const isCancelling = cancellingId === order.id;
+              const isConfirming = confirmId === order.id;
 
               return (
                 <div
@@ -139,19 +165,17 @@ const Orders: React.FC = () => {
                   style={{ animationDelay: `${i * 0.06}s` }}
                   className="border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-sm transition-all duration-200 animate-fadeInUp"
                 >
-                  {/* Row header — click to expand */}
+                  {/* Row header */}
                   <button
                     onClick={() => setExpanded(isOpen ? null : order.id)}
                     className="w-full flex items-center gap-4 px-5 py-4 text-left bg-white"
                   >
-                    {/* Order icon */}
                     <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
                       <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold text-gray-900">#{shortId}</p>
@@ -166,12 +190,12 @@ const Orders: React.FC = () => {
                       </p>
                     </div>
 
-                    {/* Total */}
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-gray-900">₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                      <p className="text-sm font-bold text-gray-900">
+                        ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      </p>
                     </div>
 
-                    {/* Chevron */}
                     <svg
                       className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`}
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -179,7 +203,7 @@ const Orders: React.FC = () => {
                     </svg>
                   </button>
 
-                  {/* Expanded items */}
+                  {/* Expanded panel */}
                   {isOpen && (
                     <div className="border-t border-gray-100 bg-gray-50 px-5 py-4 space-y-3 animate-fadeIn">
                       {order.items.map(item => (
@@ -195,12 +219,62 @@ const Orders: React.FC = () => {
                           </span>
                         </div>
                       ))}
+
                       <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
                         <span className="text-xs text-gray-400">Order total</span>
                         <span className="text-sm font-bold text-gray-900">
                           ₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
+
+                      {/* ── Cancel section ── */}
+                      {canCancel(order.status) && (
+                        <div className="pt-1">
+                          {!isConfirming ? (
+                            // First click — show confirm prompt
+                            <button
+                              onClick={() => setConfirmId(order.id)}
+                              className="w-full flex items-center justify-center gap-2 rounded-xl border border-red-200 text-red-500 text-sm font-medium py-2.5 hover:bg-red-50 transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              Cancel Order
+                            </button>
+                          ) : (
+                            // Confirm step
+                            <div className="rounded-xl bg-red-50 border border-red-100 p-4 space-y-3 animate-fadeIn">
+                              <p className="text-sm text-red-700 font-medium text-center">
+                                Are you sure you want to cancel this order?
+                              </p>
+                              <p className="text-xs text-red-400 text-center">This action cannot be undone.</p>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setConfirmId(null)}
+                                  className="flex-1 rounded-lg border border-gray-200 bg-white text-gray-600 text-sm font-medium py-2 hover:bg-gray-50 transition-colors"
+                                >
+                                  Keep Order
+                                </button>
+                                <button
+                                  onClick={() => handleCancel(order.id)}
+                                  disabled={isCancelling}
+                                  className="flex-1 rounded-lg bg-red-500 text-white text-sm font-medium py-2 hover:bg-red-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                                >
+                                  {isCancelling ? (
+                                    <>
+                                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                      </svg>
+                                      Cancelling...
+                                    </>
+                                  ) : 'Yes, Cancel'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

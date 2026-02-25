@@ -42,7 +42,6 @@ function CheckoutPage({
         }
 
         try {
-            // Step 1: Create Razorpay order
             const razorpayResponse = await fetch('/api/orders/createrazor', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -55,15 +54,13 @@ function CheckoutPage({
             }
 
             const { order: razorpayOrder } = await razorpayResponse.json();
-
-            // Step 2: Load Razorpay script
             await loadRazorpayScript();
 
             const options = {
                 key: process.env.NEXT_PUBLIC_PAYMENT_PUBLIC,
                 amount: razorpayOrder.amount,
                 currency: razorpayOrder.currency,
-                name: 'FurniCo',
+                name: 'Furnico',
                 description: 'Order Payment',
                 order_id: razorpayOrder.id,
                 prefill: {
@@ -74,7 +71,6 @@ function CheckoutPage({
                 theme: { color: '#111827' },
                 handler: async function (response: any) {
                     try {
-                        // Step 3: Verify payment signature server-side
                         const verifyResponse = await fetch('/api/orders/createrazor', {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
@@ -90,7 +86,6 @@ function CheckoutPage({
                             return;
                         }
 
-                        // Step 4: Create order in DB
                         const orderResponse = await fetch('/api/orders/create', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -129,12 +124,27 @@ function CheckoutPage({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
+        <form onSubmit={handleSubmit}>
             <button
                 disabled={loading}
-                className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+                className="w-full flex items-center justify-center gap-2 rounded-full bg-gray-900 text-white text-sm font-semibold py-3.5 hover:bg-gray-700 transition-colors disabled:opacity-60"
             >
-                {loading ? 'Processing...' : `Pay ₹${amount}`}
+                {loading ? (
+                    <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Processing...
+                    </>
+                ) : (
+                    <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
+                        Pay ₹{amount.toLocaleString('en-IN')}
+                    </>
+                )}
             </button>
         </form>
     );
@@ -142,10 +152,7 @@ function CheckoutPage({
 
 function loadRazorpayScript(): Promise<void> {
     return new Promise((resolve) => {
-        if (document.querySelector('script[src*="razorpay"]')) {
-            resolve();
-            return;
-        }
+        if (document.querySelector('script[src*="razorpay"]')) { resolve(); return; }
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;

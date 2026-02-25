@@ -10,6 +10,8 @@ datasource db {
 enum UserRole {
   ADMIN
   USER
+  DEMO_ADMIN
+  DEMO_USER
 }
 
 model Account {
@@ -72,7 +74,7 @@ model CartItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, productId]) // Composite unique constraint
+  @@unique([userId, productId])
 }
 
 enum OrderStatus {
@@ -89,7 +91,7 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   items           OrderItem[] @relation("OrderItems")
-  addressId       String      @db.ObjectId // Reference to Address
+  addressId       String      @db.ObjectId
   address         Address     @relation("OrderAddress", fields: [addressId], references: [id])
   status          OrderStatus @default(PENDING)
 
@@ -109,7 +111,7 @@ model Address {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId
   userId String  @db.ObjectId
   user   User    @relation("UserAddresses", fields: [userId], references: [id])
-  orders Order[] @relation("OrderAddress") // Relation to Orders
+  orders Order[] @relation("OrderAddress")
 
   name      String
   street    String
@@ -144,26 +146,32 @@ model User {
 model Review {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
-  rating    Int      @default(1) // Rating scale from 1 to 5
+  rating    Int      @default(1)
   productId String   @db.ObjectId
   userId    String   @db.ObjectId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  product Products @relation("ProductReviews", fields: [productId], references: [id], onDelete: Cascade) // Add this relation field
+  product Products @relation("ProductReviews", fields: [productId], references: [id], onDelete: Cascade)
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// ── NEW FIELDS ADDED ──────────────────────────────────────────────────────────
+// description : optional text description shown on the product page
+// model3dUrl  : optional URL to a .glb / .gltf file for the 3D viewer
+// ─────────────────────────────────────────────────────────────────────────────
 model Products {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  title      String?     @unique
-  price      Float?
-  category   String?
-  images     String[]
-  stock      Int
-  reviews    Review[]    @relation("ProductReviews") // Relation to reviews
-  cartItems  CartItem[]  @relation("ProductCartItems")
-  orderItems OrderItem[] @relation("ProductOrderItems")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  title       String?     @unique
+  price       Float?
+  category    String?
+  description String?
+  images      String[]
+  model3dUrl  String?
+  stock       Int
+  reviews     Review[]    @relation("ProductReviews")
+  cartItems   CartItem[]  @relation("ProductCartItems")
+  orderItems  OrderItem[] @relation("ProductOrderItems")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }

@@ -13,7 +13,7 @@ export async function PUT(req: NextRequest) {
     }
 
     try {
-        const { id, title, stock, price, images, category } = await req.json();
+        const { id, title, stock, price, images, category, description, model3dUrl } = await req.json();
 
         if (!id || typeof id !== 'string') {
             return NextResponse.json({ message: 'Invalid product id' }, { status: 400 });
@@ -37,6 +37,8 @@ export async function PUT(req: NextRequest) {
                 stock: stockInt,
                 images: images ?? [],
                 category,
+                description: description ?? null,
+                model3dUrl: model3dUrl ?? null,
             },
         });
 

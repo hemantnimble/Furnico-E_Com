@@ -53,10 +53,13 @@ export default function CartPage() {
   const handleQuantityChange = async (productId: string, increment: boolean) => {
     const item = cartItems.find((i) => i.product.id === productId);
     if (!item) return;
-    const newQuantity = increment ? item.quantity + 1 : Math.max(item.quantity - 1, 1);
+
+    // At quantity 1, pressing − does nothing (item stays, no removal)
+    if (!increment && item.quantity === 1) return;
+
+    const newQuantity = increment ? item.quantity + 1 : item.quantity - 1;
     try {
       await dispatch(updateCartItem({ id: item.id, quantity: newQuantity })).unwrap();
-      toast.success('Quantity updated');
     } catch {
       toast.error('Error updating quantity');
     }
@@ -96,7 +99,7 @@ export default function CartPage() {
     );
   }
 
-  const shipping = 8;
+  const shipping = Math.round(totalPrice * 0.1);
   const grandTotal = totalPrice + shipping;
 
   return (
@@ -115,7 +118,6 @@ export default function CartPage() {
           {/* ── Items ── */}
           <div className="lg:col-span-2 space-y-4">
 
-            {/* Column labels */}
             <div className="hidden sm:grid grid-cols-12 text-xs font-medium text-gray-400 uppercase tracking-widest pb-2">
               <span className="col-span-6">Product</span>
               <span className="col-span-3 text-center">Quantity</span>
@@ -154,13 +156,18 @@ export default function CartPage() {
                 {/* Quantity */}
                 <div className="col-span-6 sm:col-span-3 flex items-center justify-start sm:justify-center">
                   <div className="flex items-center border border-gray-200 rounded-full overflow-hidden bg-gray-50">
-                    <button onClick={() => handleQuantityChange(item.product.id, false)}
-                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors text-base">
+                    <button
+                      onClick={() => handleQuantityChange(item.product.id, false)}
+                      disabled={item.quantity === 1}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors text-base disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
                       −
                     </button>
                     <span className="w-7 text-center text-sm font-semibold text-gray-900">{item.quantity}</span>
-                    <button onClick={() => handleQuantityChange(item.product.id, true)}
-                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors text-base">
+                    <button
+                      onClick={() => handleQuantityChange(item.product.id, true)}
+                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors text-base"
+                    >
                       +
                     </button>
                   </div>
@@ -182,7 +189,6 @@ export default function CartPage() {
               </div>
             ))}
 
-            {/* Continue shopping */}
             <div className="pt-4">
               <Link href="/"
                 className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors">
@@ -220,7 +226,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Delivery</span>
-                  <span className="text-gray-800 font-medium">₹{shipping}.00</span>
+                  <span className="text-gray-800 font-medium">₹{shipping.toLocaleString("en-IN")}</span>
                 </div>
               </div>
 
@@ -239,7 +245,6 @@ export default function CartPage() {
                 </svg>
               </Link>
 
-              {/* Trust row */}
               <div className="mt-5 flex items-center justify-center gap-5">
                 {[
                   { label: 'Secure', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },

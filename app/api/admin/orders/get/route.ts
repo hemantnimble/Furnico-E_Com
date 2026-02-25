@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET() {
     const session = await auth();
@@ -14,22 +14,31 @@ export async function GET() {
     try {
         const orders = await db.orderItem.findMany({
             include: {
-                order: {
-                    include: {
-                        user: {
-                            select: {
-                                name: true,  // Fetch only the name field
-                            }
-                        }
-                    }
-                },
-                product: true,  // Include product details
+                order: true,
+                product: true,
             }
         });
 
-        return NextResponse.json({ orders }, { status: 200 });
+        // Fetch user names separately to avoid crash on deleted users
+        const userIds = [...new Set(orders.map(o => o.order?.userId).filter(Boolean))] as string[];
+        const users = await db.user.findMany({
+            where: { id: { in: userIds } },
+            select: { id: true, name: true },
+        });
+        const userMap = Object.fromEntries(users.map(u => [u.id, u.name]));
+
+        // Attach user name manually
+        const safeOrders = orders.map(item => ({
+            ...item,
+            order: item.order ? {
+                ...item.order,
+                user: { name: userMap[item.order.userId] ?? 'Deleted User' },
+            } : null,
+        }));
+
+        return NextResponse.json({ orders: safeOrders }, { status: 200 });
     } catch (err) {
-        console.log(err);
-        return NextResponse.json({ message: err }, { status: 500 });
+        console.error("err getting orders", err);
+        return NextResponse.json({ message: "Failed to fetch orders" }, { status: 500 });
     }
 }
