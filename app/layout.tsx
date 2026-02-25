@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar";
-import { CartProvider } from "@/components/CartContext";
 import BottomNavbar from "@/components/BottomNavbar";
 import StoreProvider from "@/app/StoreProvider";
 
