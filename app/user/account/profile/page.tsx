@@ -179,7 +179,7 @@ export default function Profile() {
 
           {/* Reset password */}
           <div className="mt-6 border-t border-gray-200 pt-5">
-            <p className="text-xs text-gray-400 mb-2">Can't remember your current password?</p>
+            <p className="text-xs text-gray-400 mb-2">Cannot remember your current password?</p>
             <ResetPassword email={session?.user?.email || ""} />
           </div>
         </div>

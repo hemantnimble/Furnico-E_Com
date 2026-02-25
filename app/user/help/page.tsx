@@ -263,7 +263,7 @@ export default function HelpCentrePage() {
               </div>
               <div className="text-center">
                 <p className="font-semibold text-gray-900">Message sent!</p>
-                <p className="text-sm text-gray-500 mt-1">We'll get back to you within 24 hours.</p>
+                <p className="text-sm text-gray-500 mt-1">We will get back to you within 24 hours.</p>
               </div>
               <button onClick={() => setSent(false)}
                 className="text-sm text-gray-500 underline hover:text-gray-800 transition-colors">
